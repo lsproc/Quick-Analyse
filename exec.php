@@ -4,84 +4,67 @@ mysql_select_db('test');
 $sql = 'SELECT * FROM sexsurvey_data';
 $res = mysql_query($sql);
 
-$female = array('yes' => 0, 'no' => 0);
-$male = array('yes' => 0, 'no' => 0);
+if($argc != 3) { die("Insufficient parameters\n"); }
 
-$count_female = 0;
-$count_male = 0;
+$filter = $argv[1];
+$field = $argv[2];
 
-while ($row = mysql_fetch_assoc($res)) {
-	if ($row['gender'] == 'Male') {
-		if ($row['relationship'] == 'Yes') {
-			$male['yes']++;
-		} else {
-			$male['no']++;
-		}
+$title = $field.' by '.$filter."\n";
 
-		$count_male++;
-	} else {
-		if ($row['relationship'] == 'Yes') {
-			$female['yes']++;
-		} else {
-			$female['no']++;
-		}
+$data = array();
+$data_count = array();
 
-		$count_female++;
+$filter_options = array();
+$field_options = array();
+
+while($row = mysql_fetch_assoc($res)) {
+	if(!array_key_exists($filter, $row)) {
+		die($filter." not in row\n");
 	}
+
+	if(!array_key_exists($field, $row)) {
+		die($field." not in row\n");
+	}
+	$filter_val = $row[$filter];
+	$field_val = $row[$field];
+
+	if(!array_key_exists($filter_val, $data)) {
+		$data[$filter_val] = array();
+		$data_count[$filter_val] = 0;
+	}
+
+	$data_count[$filter_val]++;
+
+	if(!array_key_exists($field_val, $data[$filter_val])) {
+		$data[$filter_val][$field_val] = 0;
+	}
+
+	$data[$filter_val][$field_val]++;
+
+	$filter_options[] = $filter_val;
+	$field_options[] = $field_val;
 }
 
+echo $title."\n";
+
+$filter_options = array_unique($filter_options);
+$field_options = array_unique($field_options);
+
+foreach($filter_options as $option) {
+	echo strtoupper($option."\n\n");
+
 ?>
-<h1>In a relationship vs gender</h1>
-<h2>Female</h2>
-<table>
-<tr><th>Option</th><th>Count</th><th>Percentage</th></tr>
-<tr><td>Yes</td><td><?php echo $female['yes']; ?></td><td><?php echo ($female['yes']/$count_female)*100; ?></td></tr>
-<tr><td>No</td><td><?php echo $female['no']; ?></td><td><?php echo ($female['no']/$count_female)*100; ?></td></tr>
-</table>
-<h2>Male</h2>
-<table>
-<tr><th>Option</th><th>Count</th><th>Percentage</th></tr>
-<tr><td>Yes</td><td><?php echo $male['yes']; ?></td><td><?php echo ($male['yes']/$count_male)*100; ?></td></tr>
-<tr><td>No</td><td><?php echo $male['no']; ?></td><td><?php echo ($male['no']/$count_male)*100; ?></td></tr>
-</table>
-<?php 
- /* CAT:Bar Chart */ 
+Option		Count		Percentage
+======		=====		==========
+<?php
 
- /* pChart library inclusions */ 
- include("pchart/class/pData.class.php"); 
- include("pchart/class/pDraw.class.php"); 
- include("pchart/class/pImage.class.php"); 
+	foreach($field_options as $field_opt) {
+		if(!array_key_exists($field_opt, $data[$option])) {
+			$data[$option][$field_opt] = 0;
+		}
 
- /* Create and populate the pData object */ 
- $MyData = new pData();   
- $MyData->addPoints(array(round(($male['yes']/$count_male)*100, 2),round(($male['no']/$count_male)*100, 2)),"Male"); 
- $MyData->addPoints(array(round(($female['yes']/$count_female)*100, 2),round(($female['no']/$count_female)*100, 2)),"Female"); 
- $MyData->setAxisName(0,"%"); 
- $MyData->addPoints(array("Yes", "No"),"Labels"); 
-// $MyData->setSerieDescription("Labels","Choice"); 
- $MyData->setAbscissa("Labels"); 
-
- /* Create the pChart object */ 
- $myPicture = new pImage(1500,500,$MyData);
- $myPicture->setFontProperties(array("FontName"=>"./fonts/verdana.ttf","FontSize"=>11));
- $myPicture->setShadow(TRUE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>20));
- $RectangleSettings = array("R"=>180,"G"=>180,"B"=>180,"Alpha"=>40,"Dash"=>TRUE,"DashR"=>240,"DashG"=>240,"DashB"=>240,"BorderR"=>100, "BorderG"=>100,"BorderB"=>100); 
- $myPicture->drawFilledRectangle(-5,-5,1600,75,$RectangleSettings);
- $myPicture->drawText(20, 40,"In a relationship by Gender",array("FontSize"=>14,"FontWeight" => "Bold"));
- $myPicture->setShadow(FALSE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>20));
- $myPicture->drawFromJPG(1440,10,'cat.jpg');
- $myPicture->setShadow(TRUE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>20));
-
- /* Draw the scale and the 1st chart */ 
- $myPicture->setGraphArea(50,100,1450,450);
- $AxisBoundaries = array(0=>array("Min"=>0,"Max"=>100));
- $ScaleSettings  = array("Mode"=>SCALE_MODE_MANUAL,"ManualScale"=>$AxisBoundaries,"DrawSubTicks"=>TRUE,"DrawArrows"=>TRUE,"ArrowSize"=>6);
- $myPicture->drawScale($ScaleSettings); 
- $myPicture->drawBarChart(array("DisplayValues"=>TRUE,"DisplayColor"=>DISPLAY_AUTO,"Rounded"=>TRUE,"Surrounding"=>30)); 
-
- /* Write the chart legend */ 
- $myPicture->drawLegend(10, 480,array("Style"=>LEGEND_NOBORDER, "Mode"=>LEGEND_HORIZONTAL)); 
-
- /* Render the picture (choose the best way) */ 
- $myPicture->render("gender.png"); 
+		echo $field_opt."\t".$data[$option][$field_opt]."\t".round(($data[$option][$field_opt]/$data_count[$option])*100,2)."\n";
+	}
+	echo "\n";
+}
 ?>

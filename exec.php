@@ -67,4 +67,51 @@ Option		Count		Percentage
 	}
 	echo "\n";
 }
-?>
+
+ /* CAT:Bar Chart */ 
+
+ /* pChart library inclusions */ 
+ include("pchart/class/pData.class.php"); 
+ include("pchart/class/pDraw.class.php"); 
+ include("pchart/class/pImage.class.php"); 
+
+ /* Create and populate the pData object */ 
+ $MyData = new pData();
+
+foreach($filter_options as $option) {
+ $g_values = array();
+ foreach($field_options as $field_opt) {
+	$g_values[] = round(($data[$option][$field_opt]/$data_count[$option])*100,2);
+ }
+ $MyData->addPoints($g_values,$option);
+}
+ $MyData->setAxisName(0,"%"); 
+ $MyData->addPoints($field_options,"Labels"); 
+ $MyData->setSerieDescription("Labels","Choice"); 
+ $MyData->setAbscissa("Labels"); 
+
+ /* Create the pChart object */ 
+ $myPicture = new pImage(1500,1000,$MyData);
+ $myPicture->setFontProperties(array("FontName"=>"pchart/fonts/verdana.ttf","FontSize"=>12));
+ $myPicture->setShadow(TRUE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>20));
+ $RectangleSettings = array("R"=>180,"G"=>180,"B"=>180,"Alpha"=>40,"Dash"=>TRUE,"DashR"=>240,"DashG"=>240,"DashB"=>240,"BorderR"=>100, "BorderG"=>100,"BorderB"=>100); 
+ $myPicture->drawFilledRectangle(1,1,1499,75,$RectangleSettings);
+ $myPicture->drawText(20, 30,"The Felix Sex Survey 2012",array("FontSize"=>12,"FontWeight" => "Bold"));
+ $myPicture->drawText(20, 60,$filter.' against '.$field,array("FontSize"=>20,"FontWeight" => "Bold"));
+ $myPicture->setShadow(FALSE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>20));
+ $myPicture->drawFromJPG(1440,10,'cat.jpg');
+ $myPicture->setShadow(TRUE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>20));
+ $myPicture->drawText(20, 980,"© Felix Imperial - www.felixonline.co.uk",array("FontSize"=>12,"FontWeight" => "Bold"));
+
+ /* Draw the scale and the 1st chart */ 
+ $myPicture->setGraphArea(400,100,1450,950);
+ $AxisBoundaries = array(0=>array("Min"=>0,"Max"=>100));
+ $ScaleSettings  = array("Mode"=>SCALE_MODE_START0,"DrawSubTicks"=>TRUE,"DrawArrows"=>TRUE,"ArrowSize"=>6);
+ $myPicture->drawScale($ScaleSettings); 
+ $myPicture->drawBarChart(array("DisplayValues"=>FALSE,"DisplayColor"=>DISPLAY_AUTO,"Surrounding"=>30)); 
+
+ /* Write the chart legend */ 
+ $myPicture->drawLegend(10, 100,array("Style"=>LEGEND_NOBORDER, "Mode"=>LEGEND_VERTICAL)); 
+
+ /* Render the picture (choose the best way) */ 
+ $myPicture->render("output/".$filter.'-'.$field.".png"); 

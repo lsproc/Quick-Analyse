@@ -81,7 +81,7 @@ Option			Count			Percentage
 	}
 	echo "\n";
 }
-return;
+//return;
  /* CAT:Bar Chart */ 
 
  /* pChart library inclusions */ 

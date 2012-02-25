@@ -1,15 +1,22 @@
 <?php
-mysql_connect('localhost', 'root', '');
-mysql_select_db('test');
-$sql = 'SELECT * FROM sexsurvey_data';
-$res = mysql_query($sql);
-
-if($argc != 3) { die("Insufficient parameters\n"); }
+if($argc < 3) { die("Insufficient parameters\n"); }
 
 $filter = $argv[1];
 $field = $argv[2];
 
-$title = $field.' by '.$filter."\n";
+if($argc < 4) { $extra_sql = $argv[3]; } else { $extra_sql = ''; }
+
+$title = $field.' by '.$filter;
+if ($extra_sql != '') {
+	$title .= ' and SQL: '.$extra_sql;
+}
+
+$title .= "\n";
+
+mysql_connect('localhost', 'root', '');
+mysql_select_db('test');
+$sql = 'SELECT * FROM sexsurvey '.$extra_sql;
+$res = mysql_query($sql);
 
 $data = array();
 $data_count = array();
@@ -50,12 +57,15 @@ echo $title."\n";
 $filter_options = array_unique($filter_options);
 $field_options = array_unique($field_options);
 
+asort($filter_options);
+asort($field_options);
+
 foreach($filter_options as $option) {
 	echo strtoupper($option."\n\n");
 
 ?>
-Option		Count		Percentage
-======		=====		==========
+Option			Count			Percentage
+======			=====			==========
 <?php
 
 	foreach($field_options as $field_opt) {
@@ -63,11 +73,11 @@ Option		Count		Percentage
 			$data[$option][$field_opt] = 0;
 		}
 
-		echo $field_opt."\t".$data[$option][$field_opt]."\t".round(($data[$option][$field_opt]/$data_count[$option])*100,2)."\n";
+		echo $field_opt."\t\t\t".$data[$option][$field_opt]."\t\t\t".round(($data[$option][$field_opt]/$data_count[$option])*100,2)."\n";
 	}
 	echo "\n";
 }
-
+return;
  /* CAT:Bar Chart */ 
 
  /* pChart library inclusions */ 
@@ -97,10 +107,11 @@ foreach($filter_options as $option) {
  $RectangleSettings = array("R"=>180,"G"=>180,"B"=>180,"Alpha"=>40,"Dash"=>TRUE,"DashR"=>240,"DashG"=>240,"DashB"=>240,"BorderR"=>100, "BorderG"=>100,"BorderB"=>100); 
  $myPicture->drawFilledRectangle(1,1,1499,75,$RectangleSettings);
  $myPicture->drawText(20, 30,"The Felix Sex Survey 2012",array("FontSize"=>12,"FontWeight" => "Bold"));
- $myPicture->drawText(20, 60,$filter.' against '.$field,array("FontSize"=>20,"FontWeight" => "Bold"));
+ $myPicture->drawText(20, 60,$field.' organised by '.$filter,array("FontSize"=>20,"FontWeight" => "Bold"));
  $myPicture->setShadow(FALSE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>20));
  $myPicture->drawFromJPG(1440,10,'cat.jpg');
  $myPicture->setShadow(TRUE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>20));
+ $myPicture->drawText(20, 960,date("F j, Y, g:i a") ,array("FontSize"=>12,"FontWeight" => "Bold"));
  $myPicture->drawText(20, 980,"© Felix Imperial - www.felixonline.co.uk",array("FontSize"=>12,"FontWeight" => "Bold"));
 
  /* Draw the scale and the 1st chart */ 
@@ -113,5 +124,8 @@ foreach($filter_options as $option) {
  /* Write the chart legend */ 
  $myPicture->drawLegend(10, 100,array("Style"=>LEGEND_NOBORDER, "Mode"=>LEGEND_VERTICAL)); 
 
- /* Render the picture (choose the best way) */ 
- $myPicture->render("output/".$filter.'-'.$field.".png"); 
+ /* Render the picture (choose the best way) */
+
+ if ($extra_sql != '') { $extra_sql = md5($extra_sql); }
+
+ $myPicture->render("output/".$field.'-'.$filter.$extra_sql.".png"); 

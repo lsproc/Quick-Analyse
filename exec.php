@@ -4,7 +4,7 @@ if($argc < 3) { die("Insufficient parameters\n"); }
 $filter = $argv[1];
 $field = $argv[2];
 
-if($argc < 4) { $extra_sql = $argv[3]; } else { $extra_sql = ''; }
+if($argc == 4) { $extra_sql = $argv[3]; } else { $extra_sql = ''; }
 
 $title = $field.' by '.$filter;
 if ($extra_sql != '') {
@@ -17,6 +17,10 @@ mysql_connect('localhost', 'root', '');
 mysql_select_db('test');
 $sql = 'SELECT * FROM sexsurvey '.$extra_sql;
 $res = mysql_query($sql);
+
+if ($res == FALSE) {
+	die('Error: '.mysql_error()."\n");
+}
 
 $data = array();
 $data_count = array();

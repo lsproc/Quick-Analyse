@@ -79,7 +79,7 @@ Option			Count			Percentage
 
 		echo $field_opt."\t\t\t".$data[$option][$field_opt]."\t\t\t".round(($data[$option][$field_opt]/$data_count[$option])*100,2)."\n";
 	}
-	echo "\n";
+	echo "All responses\t\t".$data_count[$option]."\t\t\t100\n\n";
 }
 //return;
  /* CAT:Bar Chart */ 

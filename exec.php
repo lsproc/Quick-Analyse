@@ -110,10 +110,10 @@ foreach($filter_options as $option) {
  $myPicture->setShadow(TRUE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>20));
  $RectangleSettings = array("R"=>180,"G"=>180,"B"=>180,"Alpha"=>40,"Dash"=>TRUE,"DashR"=>240,"DashG"=>240,"DashB"=>240,"BorderR"=>100, "BorderG"=>100,"BorderB"=>100); 
  $myPicture->drawFilledRectangle(1,1,1499,75,$RectangleSettings);
- $myPicture->drawText(20, 30,"The Felix Sex Survey 2012",array("FontSize"=>12,"FontWeight" => "Bold"));
+ $myPicture->drawText(20, 30,"Quick Analysis",array("FontSize"=>12,"FontWeight" => "Bold"));
  $myPicture->drawText(20, 60,$field.' organised by '.$filter,array("FontSize"=>20,"FontWeight" => "Bold"));
  $myPicture->setShadow(FALSE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>20));
- $myPicture->drawFromJPG(1440,10,'cat.jpg');
+ $myPicture->drawFromPNG(1300,10,'cat.png');
  $myPicture->setShadow(TRUE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>20));
  $myPicture->drawText(20, 960,date("F j, Y, g:i a") ,array("FontSize"=>12,"FontWeight" => "Bold"));
  $myPicture->drawText(20, 980,"© Felix Imperial - www.felixonline.co.uk",array("FontSize"=>12,"FontWeight" => "Bold"));

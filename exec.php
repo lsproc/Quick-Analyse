@@ -126,7 +126,8 @@ foreach($filter_options as $option) {
  $myPicture->drawBarChart(array("DisplayValues"=>FALSE,"DisplayColor"=>DISPLAY_AUTO,"Surrounding"=>30)); 
 
  /* Write the chart legend */ 
- $myPicture->drawLegend(10, 100,array("Style"=>LEGEND_NOBORDER, "Mode"=>LEGEND_VERTICAL)); 
+ $myPicture->drawText(10, 105,$filter.' options',array("FontSize"=>12,"FontWeight" => "Bold"));
+ $myPicture->drawLegend(10, 120,array("Style"=>LEGEND_NOBORDER, "Mode"=>LEGEND_VERTICAL)); 
 
  /* Render the picture (choose the best way) */
 

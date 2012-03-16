@@ -25,45 +25,70 @@ if ($res == FALSE) {
 $data = array();
 $data_count = array();
 
+/*
+ * Some explanation:
+ *
+ * Filter values are what we compare the data to
+ * Field values are the corresponding values for that field in the response
+ *
+ * For example, if our filter is gneder, and field is eye colour
+ * filter values are Male/Female/(Don't want to say)
+ * field values are blue/green/brown/hazel/...
+ */
+
 $filter_options = array();
 $field_options = array();
 
+// For every response
 while($row = mysql_fetch_assoc($res)) {
+	// If no column for filter
 	if(!array_key_exists($filter, $row)) {
 		die($filter." not in row\n");
 	}
 
+	// If no column for field
 	if(!array_key_exists($field, $row)) {
 		die($field." not in row\n");
 	}
+
+	// The filter and field values for this response
 	$filter_val = $row[$filter];
 	$field_val = $row[$field];
 
+	// If we havent tracked any data for this filter value, start tracking
 	if(!array_key_exists($filter_val, $data)) {
 		$data[$filter_val] = array();
 		$data_count[$filter_val] = 0;
 	}
 
+	// We have recorded a new response for this filter value
 	$data_count[$filter_val]++;
 
+	// If we havent recorded any responses for the field value of this response, for the given filter value, start tracking
+	// i.e. if we havent yet recorded any men with blue eyes
 	if(!array_key_exists($field_val, $data[$filter_val])) {
 		$data[$filter_val][$field_val] = 0;
 	}
 
+	// Record that a new match has been made
 	$data[$filter_val][$field_val]++;
 
+	// Add the recorded options to a list
 	$filter_options[] = $filter_val;
 	$field_options[] = $field_val;
 }
 
 echo $title."\n";
 
+// Only use recorded options once
 $filter_options = array_unique($filter_options);
 $field_options = array_unique($field_options);
 
+// Alphabetical sort
 asort($filter_options);
 asort($field_options);
 
+// For every filter value, report data
 foreach($filter_options as $option) {
 	echo strtoupper($option."\n\n");
 
@@ -72,6 +97,7 @@ Option			Count			Percentage
 ======			=====			==========
 <?php
 
+	// For every possible field option, give the number of responses with this field value, and that as a percentage of all responses within this filter value
 	foreach($field_options as $field_opt) {
 		if(!array_key_exists($field_opt, $data[$option])) {
 			$data[$option][$field_opt] = 0;
@@ -79,6 +105,7 @@ Option			Count			Percentage
 
 		echo $field_opt."\t\t\t".$data[$option][$field_opt]."\t\t\t".round(($data[$option][$field_opt]/$data_count[$option])*100,2)."\n";
 	}
+	// Also report all responses within this filter
 	echo "All responses\t\t".$data_count[$option]."\t\t\t100\n\n";
 }
 //return;
@@ -89,12 +116,16 @@ Option			Count			Percentage
  include("pchart/class/pDraw.class.php"); 
  include("pchart/class/pImage.class.php"); 
 
- /* Create and populate the pData object */ 
+ /* Create and populate the pData object */
+
+// good luck beyond this point
  $MyData = new pData();
 
+// For every filter value (coloured sets)
 foreach($filter_options as $option) {
  $g_values = array();
  foreach($field_options as $field_opt) {
+	// record the perecentage for each field value
 	$g_values[] = round(($data[$option][$field_opt]/$data_count[$option])*100,2);
  }
  $MyData->addPoints($g_values,$option);
